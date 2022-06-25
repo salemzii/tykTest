@@ -14,7 +14,7 @@ var (
 func main() {
 
 	dataLs := files.Reader()
-	fmt.Println(dataLs)
+
 	dbs.WriteData(dataLs)
 	fmt.Println("Complete")
 }

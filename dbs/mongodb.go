@@ -19,7 +19,7 @@ func MigrateMongodb(db *mongo.Client) error {
 	return nil
 }
 
-// Add record to mongodb collection
+// Adds record to mongodb collection
 func AddDataRecordMongodb(data *files.Data) (CreatedData *files.Data, err error) {
 	defer wg.Done()
 

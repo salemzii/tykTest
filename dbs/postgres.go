@@ -8,6 +8,7 @@ import (
 	"github.com/salemzii/tykTest/files"
 )
 
+// Migrates table for storing our Data
 func MigratePostgres(db *sql.DB) error {
 	query := `
 		CREATE TABLE IF NOT EXISTS tykdata(
@@ -21,6 +22,7 @@ func MigratePostgres(db *sql.DB) error {
 	return err
 }
 
+// Adds a data record to postgresdb
 func AddDataRecordPostgres(db *sql.DB, data *files.Data) (CreatedData *files.Data, err error) {
 	defer wg.Done()
 	fmt.Println("Writing to Postgres")

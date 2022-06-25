@@ -39,6 +39,7 @@ func init() {
 	InitWaitgroup.Wait()
 }
 
+// Makes connection to postgres server and also makes migration
 func PreparePostgres() {
 	defer InitWaitgroup.Done()
 	Postgres_uri := fmt.Sprintf("%s://%s:%s@%s/%s?sslmode=disable", "postgresql", "postgres", "auth1234", "localhost:5432", "contact")
@@ -53,6 +54,7 @@ func PreparePostgres() {
 	}
 }
 
+// connects to mongodb server and defines value for Collection
 func PrepareMongo() {
 	defer InitWaitgroup.Done()
 	mongo_uri := "mongodb://localhost:27017"
@@ -69,6 +71,10 @@ func PrepareMongo() {
 	}
 }
 
+/* this function, recieves a list of Data type,
+iterates over them and concurrently passes each data to
+respective databases i.e(mongodb and postgresql)
+*/
 func WriteData(data []files.Data) {
 
 	wg.Add(len(data))
@@ -80,5 +86,4 @@ func WriteData(data []files.Data) {
 
 	wg.Wait()
 	fmt.Println("Finished writing to mongodb and postgres")
-
 }
