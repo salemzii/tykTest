@@ -8,35 +8,24 @@ import (
 	"github.com/salemzii/tykTest/files"
 )
 
-type PostgresRepository struct {
-	db *sql.DB
-}
-
-func NewPostgresRepository(db *sql.DB) *PostgresRepository {
-
-	return &PostgresRepository{
-		db: db,
-	}
-}
-
-func (repo *PostgresRepository) Migrate() error {
+func MigratePostgres(db *sql.DB) error {
 	query := `
-		CREATE TABLE IF NOT EXISTS TykData(
+		CREATE TABLE IF NOT EXISTS tykdata(
 			id SERIAL PRIMARY KEY,
 			api_id varchar(10) NOT NULL,
 			hits integer NOT NULL
 		);
 	`
-	_, err := repo.db.Exec(query)
+	_, err := db.Exec(query)
 
 	return err
 }
 
-func (repo *PostgresRepository) Create(data *files.Data) (CreatedData *files.Data, err error) {
+func AddDataRecordPostgres(db *sql.DB, data *files.Data) (CreatedData *files.Data, err error) {
 	defer wg.Done()
 	fmt.Println("Writing to Postgres")
 
-	stmt, err := repo.db.Prepare("INSERT INTO TykData(api_id, hits) values($1, $2)")
+	stmt, err := db.Prepare("INSERT INTO tykdata(api_id, hits) values($1, $2)")
 	if err != nil {
 		log.Println(err)
 		return nil, err

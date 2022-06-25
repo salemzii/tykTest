@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	_ "github.com/lib/pq"
 	"github.com/salemzii/tykTest/files"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -20,49 +21,64 @@ type Repository interface {
 }
 
 var (
-	ErrDuplicate            = errors.New("record already exists")
-	ErrCreateFailed         = errors.New("failed to create record")
-	writePostgresRepository *PostgresRepository
-	writeMongoRepository    *MongoRepository
+	ErrDuplicate    = errors.New("record already exists")
+	ErrCreateFailed = errors.New("failed to create record")
 
-	wg sync.WaitGroup
+	Postgresdb *sql.DB
+	client     *mongo.Client
+	err        error
+
+	wg            sync.WaitGroup
+	InitWaitgroup sync.WaitGroup
 )
 
 func init() {
-	go func() {
-		Postgres_uri := fmt.Sprintf("%s://%s:%s@%s/%s?sslmode=disable", "postgresql", "postgres", "auth1234", "localhost:5432", "contact")
-
-		db, err := sql.Open("postgres", Postgres_uri)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		writePostgresRepository = NewPostgresRepository(db)
-		if err := writePostgresRepository.Migrate(); err != nil {
-			log.Fatal(err)
-		}
-	}()
-
-	go func() {
-		mongo_uri := "localhost:"
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-
-		client, err := mongo.Connect(ctx, options.Client().ApplyURI(mongo_uri))
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		writeMongoRepository = NewMongoRepository(client)
-	}()
-
+	InitWaitgroup.Add(2)
+	go PreparePostgres()
+	go PrepareMongo()
+	InitWaitgroup.Wait()
 }
 
-func WriteData(data *files.Data) {
-	wg.Add(2)
-	go writePostgresRepository.Create(data)
-	go writeMongoRepository.Create(data)
-	wg.Wait()
+func PreparePostgres() {
+	defer InitWaitgroup.Done()
+	Postgres_uri := fmt.Sprintf("%s://%s:%s@%s/%s?sslmode=disable", "postgresql", "postgres", "auth1234", "localhost:5432", "contact")
 
-	fmt.Println("Finished writing to mongo and postgres")
+	Postgresdb, err = sql.Open("postgres", Postgres_uri)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("Postgresdb is active")
+	if err := MigratePostgres(Postgresdb); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func PrepareMongo() {
+	defer InitWaitgroup.Done()
+	mongo_uri := "mongodb://localhost:27017"
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	client, err = mongo.Connect(ctx, options.Client().ApplyURI(mongo_uri))
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("mongodb is active")
+	if err := MigrateMongodb(client); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func WriteData(data []files.Data) {
+
+	wg.Add(len(data))
+
+	for _, v := range data {
+		go AddDataRecordPostgres(Postgresdb, &v)
+		go AddDataRecordMongodb(&v)
+	}
+
+	wg.Wait()
+	fmt.Println("Finished writing to mongodb and postgres")
+
 }
