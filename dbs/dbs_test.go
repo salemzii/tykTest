@@ -9,14 +9,7 @@ import (
 )
 
 var (
-	want_api_id = "lkajekl"
-	want_hits   = "5"
-
-	data   = files.Data{Api_Id: "ghjtWQR", Hits: 4}
-	datals = []files.Data{
-		{Api_Id: "GLPsert", Hits: 12},
-		{Api_Id: "QlkHye", Hits: 07},
-	}
+	data = files.Data{Api_Id: "ghjtWQR", Hits: 4}
 )
 
 // a successful case

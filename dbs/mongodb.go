@@ -54,11 +54,11 @@ func AddDataRecordMongodb(collection CollectionApi, data *files.Data) (CreatedDa
 
 	if err != nil {
 		logger.ErrorLogger(errors.New(ErrCreateFailed.Error() + ": " + err.Error()))
-		return nil, ErrCreateFailed
+		return nil, errors.New(ErrCreateFailed.Error() + ": " + err.Error())
 	}
 	if result.InsertedID == 0 {
 		logger.ErrorLogger(errors.New(ErrCreateFailed.Error() + ": " + err.Error()))
-		return nil, ErrCreateFailed
+		return nil, errors.New(ErrCreateFailed.Error() + ": " + err.Error())
 	}
 	return data, nil
 }
