@@ -1,10 +1,9 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/salemzii/tykTest/dbs"
 	"github.com/salemzii/tykTest/files"
+	"github.com/salemzii/tykTest/logger"
 )
 
 func main() {
@@ -12,5 +11,5 @@ func main() {
 	dataLs := files.Reader()
 
 	dbs.WriteData(dataLs)
-	fmt.Println("Complete")
+	logger.InfoLogger("Successfully completed write to databases")
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"sync"
 
 	_ "github.com/lib/pq"
@@ -65,5 +64,4 @@ func WriteData(data []files.Data) {
 	}
 
 	wg.Wait()
-	fmt.Println("Finished writing to mongodb and postgres")
 }

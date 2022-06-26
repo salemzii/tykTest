@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"time"
 
 	"github.com/salemzii/tykTest/files"
+	"github.com/salemzii/tykTest/logger"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -28,11 +28,11 @@ func PrepareMongo() {
 	// connect to mongodb client
 	client, err = mongo.Connect(ctx, options.Client().ApplyURI(mongo_uri))
 	if err != nil {
-		log.Fatal(errors.New(ErrConnectionFailed.Error() + ": " + err.Error()))
+		logger.ErrorLogger(errors.New(ErrConnectionFailed.Error() + ": " + err.Error()))
 	}
-	fmt.Println("mongodb is active")
+
 	if err := MigrateMongodb(client); err != nil {
-		log.Fatal(errors.New(ErrMigrationFailed.Error() + ": " + err.Error()))
+		logger.ErrorLogger(errors.New(ErrMigrationFailed.Error() + ": " + err.Error()))
 	}
 }
 
@@ -53,9 +53,11 @@ func AddDataRecordMongodb(collection CollectionApi, data *files.Data) (CreatedDa
 	result, err := collection.InsertOne(context.TODO(), bson_data)
 
 	if err != nil {
+		logger.ErrorLogger(errors.New(ErrCreateFailed.Error() + ": " + err.Error()))
 		return nil, ErrCreateFailed
 	}
 	if result.InsertedID == 0 {
+		logger.ErrorLogger(errors.New(ErrCreateFailed.Error() + ": " + err.Error()))
 		return nil, ErrCreateFailed
 	}
 	return data, nil

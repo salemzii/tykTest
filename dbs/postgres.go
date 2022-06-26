@@ -5,10 +5,10 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/salemzii/tykTest/files"
+	"github.com/salemzii/tykTest/logger"
 )
 
 // Makes connection to postgres server and also makes migration
@@ -18,11 +18,11 @@ func PreparePostgres() {
 
 	Postgresdb, err = sql.Open("postgres", Postgres_uri)
 	if err != nil {
-		log.Fatal(errors.New(ErrConnectionFailed.Error() + ": " + err.Error()))
+		logger.ErrorLogger(errors.New(ErrConnectionFailed.Error() + ": " + err.Error()))
 	}
 	fmt.Println("Postgresdb is active")
 	if err := MigratePostgres(Postgresdb); err != nil {
-		log.Fatal(errors.New(ErrMigrationFailed.Error() + ": " + err.Error()))
+		logger.ErrorLogger(errors.New(ErrMigrationFailed.Error() + ": " + err.Error()))
 	}
 }
 
@@ -47,7 +47,7 @@ func AddDataRecordPostgres(db *sql.DB, data *files.Data) (CreatedData *files.Dat
 	ctx := context.Background()
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
-		log.Fatal(err)
+		logger.ErrorLogger(err)
 	}
 
 	// execute insert statement
@@ -55,10 +55,12 @@ func AddDataRecordPostgres(db *sql.DB, data *files.Data) (CreatedData *files.Dat
 
 	if err != nil {
 		tx.Rollback()
+		logger.ErrorLogger(errors.New(ErrCreateFailed.Error() + ": " + err.Error()))
 		return nil, errors.New(ErrCreateFailed.Error() + ": " + err.Error())
 	}
 
 	if err = tx.Commit(); err != nil {
+		logger.ErrorLogger(errors.New(ErrCreateFailed.Error() + ": " + err.Error()))
 		return nil, errors.New(ErrCreateFailed.Error() + ": " + err.Error())
 	}
 

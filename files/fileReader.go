@@ -2,10 +2,11 @@ package files
 
 import (
 	"bufio"
-	"log"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/salemzii/tykTest/logger"
 )
 
 type Data struct {
@@ -21,7 +22,7 @@ func Reader() []Data {
 	// open file
 	file, err := os.Open("data.txt")
 	if err != nil {
-		log.Fatal(err)
+		logger.ErrorLogger(err)
 	}
 
 	defer file.Close()
@@ -34,7 +35,7 @@ func Reader() []Data {
 		MakeDataCopy(ParseLine(scanner.Text()))
 	}
 	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
+		logger.ErrorLogger(err)
 	}
 	return datals
 }
