@@ -5,7 +5,7 @@
 ## To run the project
     run `git clone https://github.com/salemzii/tykTest.git`
     
-    cd tyk
+    cd tykTest
     
     run tests with `go test -v ./...`
     
