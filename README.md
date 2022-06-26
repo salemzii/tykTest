@@ -8,3 +8,5 @@
     cd tyk
     
     run tests with `go test -v ./...`
+    
+    to run code `./tykTest`
