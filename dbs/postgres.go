@@ -3,6 +3,7 @@ package dbs
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -17,11 +18,11 @@ func PreparePostgres() {
 
 	Postgresdb, err = sql.Open("postgres", Postgres_uri)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(errors.New(ErrConnectionFailed.Error() + ": " + err.Error()))
 	}
 	fmt.Println("Postgresdb is active")
 	if err := MigratePostgres(Postgresdb); err != nil {
-		log.Fatal(err)
+		log.Fatal(errors.New(ErrMigrationFailed.Error() + ": " + err.Error()))
 	}
 }
 
@@ -49,15 +50,16 @@ func AddDataRecordPostgres(db *sql.DB, data *files.Data) (CreatedData *files.Dat
 		log.Fatal(err)
 	}
 
+	// execute insert statement
 	_, err = tx.ExecContext(ctx, "INSERT INTO tykdata(api_id, hits) values($1, $2)", data.Api_Id, data.Hits)
 
 	if err != nil {
 		tx.Rollback()
-		return nil, err
+		return nil, errors.New(ErrCreateFailed.Error() + ": " + err.Error())
 	}
 
 	if err = tx.Commit(); err != nil {
-		return nil, ErrCreateFailed
+		return nil, errors.New(ErrCreateFailed.Error() + ": " + err.Error())
 	}
 
 	return data, nil

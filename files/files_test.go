@@ -19,16 +19,15 @@ func TestReader(t *testing.T) {
 	}
 }
 
-/*
 func TestParseLine(t *testing.T) {
 	line := `{"api_id":"lkaJek1","hits":5}`
 	api_id, hits := ParseLine(line)
 
-	if !(api_id == want_api_id && hits == want_hits) {
+	if !(reflect.TypeOf(api_id) == reflect.TypeOf(want_api_id) && reflect.TypeOf(hits) == reflect.TypeOf(want_hits)) {
 		t.Errorf("Expected (%s, %s), but got (%s, %s)", want_api_id, want_hits, api_id, hits)
 	}
+
 }
-*/
 
 func TestMakeDataCopy(t *testing.T) {
 	got := MakeDataCopy(want_api_id, want_hits)

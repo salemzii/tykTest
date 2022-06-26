@@ -30,8 +30,10 @@ func (m *mockCollection) InsertOne(ctx context.Context, document interface{}, op
 }
 
 var (
-	ErrDuplicate    = errors.New("record already exists")
-	ErrCreateFailed = errors.New("failed to create record")
+	ErrConnectionFailed = errors.New("error connecting to db: ")
+	ErrDuplicate        = errors.New("record already exists")
+	ErrCreateFailed     = errors.New("failed to create record: ")
+	ErrMigrationFailed  = errors.New("failed to migrate db: ")
 
 	Postgresdb *sql.DB
 	client     *mongo.Client
@@ -41,6 +43,7 @@ var (
 	InitWaitgroup sync.WaitGroup
 )
 
+// asynchronously initialize databases connections
 func init() {
 	InitWaitgroup.Add(2)
 	go PreparePostgres()

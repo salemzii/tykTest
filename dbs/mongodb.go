@@ -2,6 +2,7 @@ package dbs
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -20,17 +21,18 @@ var (
 // connects to mongodb server and defines value for Collection
 func PrepareMongo() {
 	defer InitWaitgroup.Done()
-	mongo_uri := os.Getenv("MONGO_URI") //"mongodb://localhost:27017"
+	mongo_uri := os.Getenv("MONGO_URI")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
+	// connect to mongodb client
 	client, err = mongo.Connect(ctx, options.Client().ApplyURI(mongo_uri))
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(errors.New(ErrConnectionFailed.Error() + ": " + err.Error()))
 	}
 	fmt.Println("mongodb is active")
 	if err := MigrateMongodb(client); err != nil {
-		log.Fatal(err)
+		log.Fatal(errors.New(ErrMigrationFailed.Error() + ": " + err.Error()))
 	}
 }
 
