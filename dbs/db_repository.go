@@ -5,9 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
 	"sync"
-	"time"
 
 	_ "github.com/lib/pq"
 	"github.com/salemzii/tykTest/files"
@@ -15,9 +13,20 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type Repository interface {
-	Migrate() error
-	Create(data files.Data) (CreatedData *files.Data, err error)
+// Accepts any type that implements method InsertOne()
+type CollectionApi interface {
+	InsertOne(ctx context.Context, document interface{}, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error)
+}
+
+// Fake Collection struct that implements CollectionApi interface
+type mockCollection struct {
+}
+
+// Fake method to simulate *mongo.Collection.InsertOne method
+func (m *mockCollection) InsertOne(ctx context.Context, document interface{}, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {
+	collection := &mongo.InsertOneResult{}
+
+	return collection, nil
 }
 
 var (
@@ -39,49 +48,17 @@ func init() {
 	InitWaitgroup.Wait()
 }
 
-// Makes connection to postgres server and also makes migration
-func PreparePostgres() {
-	defer InitWaitgroup.Done()
-	Postgres_uri := fmt.Sprintf("%s://%s:%s@%s/%s?sslmode=disable", "postgresql", "postgres", "auth1234", "localhost:5432", "contact")
+// this function, recieves a list of Data type,
+// iterates over them and concurrently passes each data to
+// respective databases i.e(mongodb and postgresql)
 
-	Postgresdb, err = sql.Open("postgres", Postgres_uri)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("Postgresdb is active")
-	if err := MigratePostgres(Postgresdb); err != nil {
-		log.Fatal(err)
-	}
-}
-
-// connects to mongodb server and defines value for Collection
-func PrepareMongo() {
-	defer InitWaitgroup.Done()
-	mongo_uri := "mongodb://localhost:27017"
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	client, err = mongo.Connect(ctx, options.Client().ApplyURI(mongo_uri))
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("mongodb is active")
-	if err := MigrateMongodb(client); err != nil {
-		log.Fatal(err)
-	}
-}
-
-/* this function, recieves a list of Data type,
-iterates over them and concurrently passes each data to
-respective databases i.e(mongodb and postgresql)
-*/
 func WriteData(data []files.Data) {
 
 	wg.Add(len(data))
 
 	for _, v := range data {
 		go AddDataRecordPostgres(Postgresdb, &v)
-		go AddDataRecordMongodb(&v)
+		go AddDataRecordMongodb(tykCollection, &v)
 	}
 
 	wg.Wait()

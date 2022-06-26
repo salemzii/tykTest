@@ -1,12 +1,29 @@
 package dbs
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/salemzii/tykTest/files"
 )
+
+// Makes connection to postgres server and also makes migration
+func PreparePostgres() {
+	defer InitWaitgroup.Done()
+	Postgres_uri := os.Getenv("PG_URI")
+
+	Postgresdb, err = sql.Open("postgres", Postgres_uri)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("Postgresdb is active")
+	if err := MigratePostgres(Postgresdb); err != nil {
+		log.Fatal(err)
+	}
+}
 
 // Migrates table for storing our Data
 func MigratePostgres(db *sql.DB) error {
@@ -17,7 +34,7 @@ func MigratePostgres(db *sql.DB) error {
 			hits integer NOT NULL
 		);
 	`
-	_, err := db.Exec(query)
+	_, err := Postgresdb.Exec(query)
 
 	return err
 }
@@ -26,24 +43,20 @@ func MigratePostgres(db *sql.DB) error {
 func AddDataRecordPostgres(db *sql.DB, data *files.Data) (CreatedData *files.Data, err error) {
 	defer wg.Done()
 	fmt.Println("Writing to Postgres")
-
-	stmt, err := db.Prepare("INSERT INTO tykdata(api_id, hits) values($1, $2)")
+	ctx := context.Background()
+	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
-		log.Println(err)
-		return nil, err
-	}
-	res, err := stmt.Exec(data.Api_Id, data.Hits)
-
-	if err != nil {
-		log.Println(err)
-		return nil, err
+		log.Fatal(err)
 	}
 
-	rowsaffected, err := res.RowsAffected()
+	_, err = tx.ExecContext(ctx, "INSERT INTO tykdata(api_id, hits) values($1, $2)", data.Api_Id, data.Hits)
+
 	if err != nil {
+		tx.Rollback()
 		return nil, err
 	}
-	if rowsaffected == 0 {
+
+	if err = tx.Commit(); err != nil {
 		return nil, ErrCreateFailed
 	}
 

@@ -7,10 +7,6 @@ import (
 	"github.com/salemzii/tykTest/files"
 )
 
-var (
-//waitgroup sync.WaitGroup
-)
-
 func main() {
 
 	dataLs := files.Reader()
