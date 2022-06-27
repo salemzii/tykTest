@@ -7,7 +7,8 @@
     
     cd tykTest
     
-    run tests with `go test -v ./...`
+    run tests with:
+     `go test -v ./...`
     
     
     to run code:
