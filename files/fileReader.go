@@ -16,15 +16,21 @@ type Data struct {
 
 var (
 	datals []Data
+	file   *os.File
+	err    error
 )
 
-func Reader() []Data {
+func init() {
+
 	// open file
-	file, err := os.Open("data.txt")
+	file, err = os.Open("data.txt")
 	if err != nil {
 		logger.ErrorLogger(err)
 	}
 
+}
+
+func Reader() []Data {
 	defer file.Close()
 
 	// read the file line by line using scanner

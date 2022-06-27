@@ -1,0 +1,2 @@
+[error]2022/06/27 15:36:10.461091 error_logger.go:11: open data.txt: no such file or directory
+[error]2022/06/27 15:38:11.828679 error_logger.go:11: open data.txt: no such file or directory

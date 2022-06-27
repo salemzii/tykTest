@@ -3,7 +3,6 @@ package dbs
 import (
 	"context"
 	"errors"
-	"fmt"
 	"os"
 	"time"
 
@@ -21,12 +20,14 @@ var (
 // connects to mongodb server and defines value for Collection
 func PrepareMongo() {
 	defer InitWaitgroup.Done()
-	mongo_uri := os.Getenv("MONGO_URI")
+	//mongo_uri := os.Getenv("MONGO_URI")
+	//m_uri := fmt.Sprintf("%s+srv://%s:%s@%s/%s?retryWrites=true&w=majority", "mongodb", "taskdb", "", "127.0.0.1:27017")
+	p := os.Getenv("MONGO_URI") //"mongodb+srv://mongodb:salem:auth1234@127.0.0.1:27017/taskdb"
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	// connect to mongodb client
-	client, err = mongo.Connect(ctx, options.Client().ApplyURI(mongo_uri))
+	client, err = mongo.Connect(ctx, options.Client().ApplyURI(p))
 	if err != nil {
 		logger.ErrorLogger(errors.New(ErrConnectionFailed.Error() + ": " + err.Error()))
 	}
@@ -46,8 +47,6 @@ func MigrateMongodb(db *mongo.Client) error {
 // implements CollectionApi type
 func AddDataRecordMongodb(collection CollectionApi, data *files.Data) (CreatedData *files.Data, err error) {
 	defer wg.Done()
-
-	fmt.Println("Writing to mongodb")
 
 	bson_data := bson.D{{Key: "api_id", Value: data.Api_Id}, {Key: "hits", Value: data.Hits}}
 	result, err := collection.InsertOne(context.TODO(), bson_data)

@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"os"
 
 	"github.com/salemzii/tykTest/files"
@@ -14,13 +13,13 @@ import (
 // Makes connection to postgres server and also makes migration
 func PreparePostgres() {
 	defer InitWaitgroup.Done()
-	Postgres_uri := os.Getenv("PG_URI")
+	Postgres_uri := os.Getenv("PG_LOCAL")
 
 	Postgresdb, err = sql.Open("postgres", Postgres_uri)
 	if err != nil {
 		logger.ErrorLogger(errors.New(ErrConnectionFailed.Error() + ": " + err.Error()))
 	}
-	fmt.Println("Postgresdb is active")
+
 	if err := MigratePostgres(Postgresdb); err != nil {
 		logger.ErrorLogger(errors.New(ErrMigrationFailed.Error() + ": " + err.Error()))
 	}
@@ -43,7 +42,7 @@ func MigratePostgres(db *sql.DB) error {
 // Adds a data record to postgresdb
 func AddDataRecordPostgres(db *sql.DB, data *files.Data) (CreatedData *files.Data, err error) {
 	defer wg.Done()
-	fmt.Println("Writing to Postgres")
+
 	ctx := context.Background()
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {

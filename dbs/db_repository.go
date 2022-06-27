@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"log"
+	"os"
 	"sync"
 
 	_ "github.com/lib/pq"
@@ -44,10 +46,15 @@ var (
 
 // asynchronously initialize databases connections
 func init() {
-	InitWaitgroup.Add(2)
-	go PreparePostgres()
-	go PrepareMongo()
-	InitWaitgroup.Wait()
+	if len(os.Args) > 1 && os.Args[1][:5] == "-test" {
+		log.Println("testing")
+		return
+	} else {
+		InitWaitgroup.Add(2)
+		go PreparePostgres()
+		go PrepareMongo()
+		InitWaitgroup.Wait()
+	}
 }
 
 // this function, recieves a list of Data type,
