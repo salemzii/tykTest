@@ -13,7 +13,7 @@ import (
 // Makes connection to postgres server and also makes migration
 func PreparePostgres() {
 	defer InitWaitgroup.Done()
-	Postgres_uri := os.Getenv("PG_LOCAL")
+	Postgres_uri := os.Getenv("PG_URI")
 
 	Postgresdb, err = sql.Open("postgres", Postgres_uri)
 	if err != nil {
