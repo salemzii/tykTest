@@ -7,6 +7,11 @@
     
     cd tykTest
     
-    run tests with `go test -v ./...`
+    run tests with:
+     `go test -v ./...`
     
-    to run code `./tykTest`
+    
+    to run code:
+    `set values for MONGO_URI and PG_URI in .env file`
+    
+    then run `./tykTest`
