@@ -1,8 +1,6 @@
 package dbs
 
 import (
-	"log"
-	"os"
 	"regexp"
 	"testing"
 
@@ -14,13 +12,6 @@ import (
 var (
 	data = files.Data{Api_Id: "ghjtWQR", Hits: 4}
 )
-
-func LoadTest() {
-	if len(os.Args) > 1 && os.Args[1][:5] == "-test" {
-		log.Println("testing")
-		return
-	}
-}
 
 // a successful case
 func TestAddDataRecordPostgres(t *testing.T) {

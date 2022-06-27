@@ -20,14 +20,13 @@ var (
 // connects to mongodb server and defines value for Collection
 func PrepareMongo() {
 	defer InitWaitgroup.Done()
-	//mongo_uri := os.Getenv("MONGO_URI")
-	//m_uri := fmt.Sprintf("%s+srv://%s:%s@%s/%s?retryWrites=true&w=majority", "mongodb", "taskdb", "", "127.0.0.1:27017")
-	p := os.Getenv("MONGO_URI") //"mongodb+srv://mongodb:salem:auth1234@127.0.0.1:27017/taskdb"
+	mongo_uri := os.Getenv("MONGO_URI")
+
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	// connect to mongodb client
-	client, err = mongo.Connect(ctx, options.Client().ApplyURI(p))
+	client, err = mongo.Connect(ctx, options.Client().ApplyURI(mongo_uri))
 	if err != nil {
 		logger.ErrorLogger(errors.New(ErrConnectionFailed.Error() + ": " + err.Error()))
 	}
