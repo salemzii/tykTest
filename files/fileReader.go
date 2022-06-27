@@ -16,22 +16,17 @@ type Data struct {
 
 var (
 	datals []Data
-	file   *os.File
-	err    error
 )
 
-func init() {
-
+func Reader() []Data {
 	// open file
-	file, err = os.Open("data.txt")
+	file, err := os.Open("data.txt")
 	if err != nil {
 		logger.ErrorLogger(err)
 	}
 
-}
-
-func Reader() []Data {
 	defer file.Close()
+
 	// read the file line by line using scanner
 	scanner := bufio.NewScanner(file)
 
@@ -52,7 +47,7 @@ func ParseLine(line string) (api_id, hits string) {
 
 		ParseLine receives each line gotten from data.txt, and formats the said line
 		using various delimiters enclosed in each string literal.
-		And returns the required API_ID and HITS
+		And returns the require API_ID and HITS
 	*/
 
 	TrimmedStr := strings.Trim(line, "{}")

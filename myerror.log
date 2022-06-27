@@ -1,0 +1,1 @@
+[error]2022/06/27 15:56:10.006267 error_logger.go:12: error connecting to db: : error parsing uri: scheme must be "mongodb" or "mongodb+srv"
